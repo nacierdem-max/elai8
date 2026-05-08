@@ -17,7 +17,7 @@ export default function RiskAlertList() {
           </div>
           <div>
             <h3 className="text-sm font-semibold text-foreground">Açık Riskler</h3>
-            <p className="text-xs text-muted-foreground">18 kritik · 29 toplam</p>
+            <p className="text-xs text-muted-foreground">{openRisks.filter(r => r.status === 'Açık').length} açık · {openRisks.length} toplam</p>
           </div>
         </div>
         <Link href="/risks" className="text-xs text-primary hover:underline flex items-center gap-1">
@@ -31,8 +31,9 @@ export default function RiskAlertList() {
           const project = PROJECTS.find(p => p.id === risk.projectId);
 
           return (
-            <div
+            <Link
               key={`risk-alert-${risk.id}`}
+              href={`/projects/${risk.projectId}`}
               className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/60 transition-all duration-150 cursor-pointer border border-transparent hover:border-border"
             >
               <div
@@ -49,17 +50,16 @@ export default function RiskAlertList() {
                 <p className="text-xs text-muted-foreground mt-0.5">{risk.date}</p>
               </div>
               <RiskBadge status={risk.status as RiskStatus} />
-            </div>
+            </Link>
           );
         })}
       </div>
 
-      {/* Summary */}
       <div className="mt-4 pt-3 border-t border-border grid grid-cols-3 gap-2 text-center">
         {[
-          { label: 'Açık', value: 5, color: '#ef4444' },
-          { label: 'Riskli', value: 2, color: '#f97316' },
-          { label: 'Çözüm', value: 1, color: '#eab308' },
+          { label: 'Açık', value: openRisks.filter(r => r.status === 'Açık').length, color: '#ef4444' },
+          { label: 'Riskli', value: openRisks.filter(r => r.status === 'Riskli').length, color: '#f97316' },
+          { label: 'Çözüm', value: openRisks.filter(r => r.status === 'Çözüm Aranıyor').length, color: '#eab308' },
         ].map((s) => (
           <div key={`risk-sum-${s.label}`} className="bg-muted/30 rounded-lg py-2">
             <p className="text-lg font-bold tabular-nums" style={{ color: s.color }}>{s.value}</p>

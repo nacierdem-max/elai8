@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AppLogo from '@/components/ui/AppLogo';
-import { LayoutDashboard, AlertTriangle, BarChart3, Settings, ChevronLeft, ChevronRight, Archive, LogOut, Layers } from 'lucide-react';
+import { LayoutDashboard, AlertTriangle, BarChart3, Settings, ChevronLeft, ChevronRight, Archive, LogOut, Layers, FolderKanban, Users, CheckSquare, Bot, Shield } from 'lucide-react';
 import { useRole } from '@/context/RoleContext';
 import { type PersonnelRoleKey } from '@/data/mockData';
 
@@ -19,9 +19,12 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { id: 'nav-dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
+  { id: 'nav-projects', label: 'Projeler', icon: FolderKanban, href: '/projects' },
+  { id: 'nav-tasks', label: 'Görevler', icon: CheckSquare, href: '/task-kanban-panel' },
+  { id: 'nav-team', label: 'Ekip', icon: Users, href: '/team' },
   { id: 'nav-workspace', label: 'Çalışma Alanı', icon: Layers, href: '/workspace' },
   {
-    id: 'nav-risks', label: 'Riskler', icon: AlertTriangle, href: '/risks', badge: 18,
+    id: 'nav-risks', label: 'Riskler', icon: AlertTriangle, href: '/risks', badge: 6,
     allowedRoles: ['proje-lideri', 'departman-lideri', 'urun-yoneticisi', 'arge-temsilcisi', 'arge-yoneticisi'],
   },
   {
@@ -29,8 +32,13 @@ const NAV_ITEMS: NavItem[] = [
     allowedRoles: ['proje-lideri', 'departman-lideri', 'urun-yoneticisi', 'arge-temsilcisi', 'arge-yoneticisi'],
   },
   {
-    id: 'nav-analytics', label: 'AI Asistan', icon: BarChart3, href: '/analytics',
+    id: 'nav-analytics', label: 'Analitik', icon: BarChart3, href: '/analytics',
     allowedRoles: ['departman-lideri', 'urun-yoneticisi', 'arge-temsilcisi', 'arge-yoneticisi'],
+  },
+  { id: 'nav-ai', label: 'AI Asistan', icon: Bot, href: '/ai-assistant' },
+  {
+    id: 'nav-permissions', label: 'İzin Yönetimi', icon: Shield, href: '/permissions',
+    allowedRoles: ['proje-lideri', 'departman-lideri', 'urun-yoneticisi', 'arge-temsilcisi', 'arge-yoneticisi'],
   },
 ];
 
@@ -75,40 +83,26 @@ export default function Sidebar({ currentPath = '/dashboard' }: SidebarProps) {
       >
         {!collapsed && (
           <div className="flex items-center gap-2.5 min-w-0">
-            <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-              style={{ background: '#0071e3' }}
-            >
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#0071e3' }}>
               <AppLogo size={16} />
             </div>
             <span className="font-semibold text-sm" style={{ color: '#1d1d1f', letterSpacing: '-0.01em' }}>EliarArGe</span>
           </div>
         )}
         {collapsed && (
-          <div
-            className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-            style={{ background: '#0071e3' }}
-          >
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#0071e3' }}>
             <AppLogo size={16} />
           </div>
         )}
         {!collapsed && (
-          <button
-            onClick={() => setCollapsed(true)}
-            className="p-1.5 rounded-md transition-colors hover:bg-gray-100"
-            style={{ color: '#aeaeb2' }}
-          >
+          <button onClick={() => setCollapsed(true)} className="p-1.5 rounded-md transition-colors hover:bg-gray-100" style={{ color: '#aeaeb2' }}>
             <ChevronLeft size={14} />
           </button>
         )}
       </div>
 
       {collapsed && (
-        <button
-          onClick={() => setCollapsed(false)}
-          className="flex justify-center py-2 transition-colors hover:bg-gray-50"
-          style={{ color: '#aeaeb2' }}
-        >
+        <button onClick={() => setCollapsed(false)} className="flex justify-center py-2 transition-colors hover:bg-gray-50" style={{ color: '#aeaeb2' }}>
           <ChevronRight size={14} />
         </button>
       )}
@@ -117,16 +111,14 @@ export default function Sidebar({ currentPath = '/dashboard' }: SidebarProps) {
       <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-0.5">
         {visibleItems.map((item) => {
           const NavIcon = item.icon;
-          const active = item.href === currentPath;
+          const active = item.href === currentPath || (item.href !== '/dashboard' && currentPath?.startsWith(item.href));
 
           return (
             <Link
               key={item.id}
               href={item.href}
               title={collapsed ? item.label : undefined}
-              className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors
-                ${collapsed ? 'justify-center' : ''}
-              `}
+              className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors ${collapsed ? 'justify-center' : ''}`}
               style={{
                 background: active ? '#f0f7ff' : 'transparent',
                 color: active ? '#0071e3' : '#3a3a3c',
@@ -137,10 +129,7 @@ export default function Sidebar({ currentPath = '/dashboard' }: SidebarProps) {
                 <>
                   <span className="flex-1 truncate">{item.label}</span>
                   {item.badge !== undefined && (
-                    <span
-                      className="text-xs font-semibold px-1.5 py-0.5 rounded-md tabular-nums"
-                      style={{ background: '#fef2f2', color: '#ef4444' }}
-                    >
+                    <span className="text-xs font-semibold px-1.5 py-0.5 rounded-md tabular-nums" style={{ background: '#fef2f2', color: '#ef4444' }}>
                       {item.badge}
                     </span>
                   )}
@@ -154,7 +143,7 @@ export default function Sidebar({ currentPath = '/dashboard' }: SidebarProps) {
       {/* Bottom */}
       <div className="p-2 space-y-0.5" style={{ borderTop: '1px solid #f0f0f5' }}>
         <Link
-          href="/dashboard"
+          href="/settings"
           className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-gray-50 ${collapsed ? 'justify-center' : ''}`}
           style={{ color: '#6e6e73' }}
           title={collapsed ? 'Ayarlar' : undefined}
@@ -175,14 +164,8 @@ export default function Sidebar({ currentPath = '/dashboard' }: SidebarProps) {
 
         {/* Current user */}
         {!collapsed && (
-          <div
-            className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg mt-1"
-            style={{ background: '#f5f5f7' }}
-          >
-            <div
-              className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-              style={{ background: roleBg, color: roleColor }}
-            >
+          <div className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg mt-1" style={{ background: '#f5f5f7' }}>
+            <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background: roleBg, color: roleColor }}>
               {displayInitials}
             </div>
             <div className="min-w-0">
@@ -193,10 +176,7 @@ export default function Sidebar({ currentPath = '/dashboard' }: SidebarProps) {
         )}
         {collapsed && (
           <div className="flex justify-center py-1">
-            <div
-              className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
-              style={{ background: roleBg, color: roleColor }}
-            >
+            <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: roleBg, color: roleColor }}>
               {displayInitials}
             </div>
           </div>

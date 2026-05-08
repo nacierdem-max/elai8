@@ -5,6 +5,7 @@ import { PROJECTS, PERSONS, TASKS, DEPARTMENT_COLORS, type Project, type Departm
 import { FolderKanban, Search, ChevronRight, CheckCircle, AlertTriangle, Clock, X, BarChart2, Users, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { useRole } from '@/context/RoleContext';
 
 const STATUS_COLORS: Record<string, string> = {
   Aktif: '#22c55e',
@@ -75,7 +76,17 @@ function ProjectModal({ project, onClose }: ProjectModalProps) {
             <p className="text-sm text-muted-foreground mt-1">Lider: {lead?.name} · {project.startDate} → {project.endDate}</p>
             {project.description && <p className="text-xs text-muted-foreground mt-1">{project.description}</p>}
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"><X size={18} /></button>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/projects/${project.id}`}
+              onClick={onClose}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+              style={{ background: '#0071e3', color: '#fff' }}
+            >
+              <ExternalLink size={12} /> Tam Detay
+            </Link>
+            <button onClick={onClose} className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"><X size={18} /></button>
+          </div>
         </div>
         <div className="p-6 space-y-6">
           <div>
@@ -110,7 +121,7 @@ function ProjectModal({ project, onClose }: ProjectModalProps) {
                   const deptColor = DEPARTMENT_COLORS[person.department] || '#94a3b8';
                   const isLead = person.id === project.leadId;
                   return (
-                    <div key={person.id} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-border bg-muted/20">
+                    <Link key={person.id} href={`/team?person=${person.id}`} onClick={onClose} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-border bg-muted/20 hover:bg-primary/5 hover:border-primary/30 transition-all">
                       <div
                         className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
                         style={{ backgroundColor: deptColor }}
@@ -122,7 +133,7 @@ function ProjectModal({ project, onClose }: ProjectModalProps) {
                         {person.department}
                       </span>
                       {isLead && <span className="text-xs text-amber-500 font-bold">★</span>}
-                    </div>
+                    </Link>
                   );
                 })}
               </div>
@@ -149,11 +160,11 @@ function ProjectModal({ project, onClose }: ProjectModalProps) {
             <div>
               <h3 className="text-sm font-semibold text-foreground mb-3">Görevler ({projectTasks.length})</h3>
               <div className="space-y-2">
-                {projectTasks.map(task => {
+                {projectTasks.slice(0, 5).map(task => {
                   const assignee = PERSONS.find(p => p.id === task.assigneeId);
                   const collabPersons = (task.collaboratorIds || []).map(id => PERSONS.find(p => p.id === id)).filter(Boolean);
                   return (
-                    <Link key={task.id} href="/task-kanban-panel" className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/60 border border-transparent hover:border-border transition-all cursor-pointer" onClick={onClose}>
+                    <Link key={task.id} href={`/projects/${project.id}?tab=tasks`} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/60 border border-transparent hover:border-border transition-all cursor-pointer" onClick={onClose}>
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style={{ backgroundColor: DEPARTMENT_COLORS[task.department] || '#94a3b8' }}>
                           {assignee?.avatar?.slice(0, 2) || '?'}
@@ -180,6 +191,11 @@ function ProjectModal({ project, onClose }: ProjectModalProps) {
                     </Link>
                   );
                 })}
+                {projectTasks.length > 5 && (
+                  <Link href={`/projects/${project.id}?tab=tasks`} onClick={onClose} className="flex items-center justify-center gap-1.5 p-2 rounded-lg text-xs font-semibold text-primary hover:bg-primary/5 transition-colors border border-dashed border-primary/30">
+                    +{projectTasks.length - 5} görev daha → Tümünü Gör
+                  </Link>
+                )}
               </div>
             </div>
           )}
@@ -741,6 +757,7 @@ function ProjectsPageInner() {
   const [deptFilter, setDeptFilter] = useState<string>('Tümü');
   const [activeTab, setActiveTab] = useState<'cards' | 'gantt' | 'person'>('gantt');
   const searchParams = useSearchParams();
+  const { currentRole, canViewAllData, isTeamLeader, canViewProject } = useRole();
 
   // Auto-open project from URL param (e.g. ?project=prj-001)
   const [autoOpenProject, setAutoOpenProject] = useState<Project | null>(null);
@@ -752,15 +769,20 @@ function ProjectsPageInner() {
     }
   }, [searchParams]);
 
+  // Role-based project filtering
+  const visibleProjects = PROJECTS.filter(p => canViewProject(p.leadId, p.collaboratorIds || []));
+
   const statuses = ['Tümü', 'Aktif', 'Kritik', 'Beklemede', 'Tamamlandı'];
   const departments: string[] = ['Tümü', 'Elektronik', 'Yazılım', 'Mekanik', 'Test', 'Otomasyon', 'Donanım', 'Saha', 'Ürün', 'Lojistik', 'Destek'];
 
-  const filtered = PROJECTS.filter(p => {
+  const filtered = visibleProjects.filter(p => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === 'Tümü' || p.status === statusFilter;
     const matchDept = deptFilter === 'Tümü' || p.department.includes(deptFilter as Department);
     return matchSearch && matchStatus && matchDept;
   });
+
+  const isRestricted = !canViewAllData && !isTeamLeader;
 
   return (
     <AppLayout currentPath="/projects">
@@ -769,7 +791,12 @@ function ProjectsPageInner() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Projeler</h1>
-            <p className="text-muted-foreground text-sm mt-1">{PROJECTS.length} proje · 2025–2026 Dönemi</p>
+            <p className="text-muted-foreground text-sm mt-1">
+              {isRestricted
+                ? `${visibleProjects.length} proje (erişiminiz olan)`
+                : `${PROJECTS.length} proje · 2025–2026 Dönemi`
+              }
+            </p>
           </div>
         </div>
 
@@ -809,7 +836,7 @@ function ProjectsPageInner() {
                   }`}
                 >
                   {s}
-                  {s !== 'Tümü' && <span className="ml-1.5 opacity-70">{PROJECTS.filter(p => p.status === s).length}</span>}
+                  {s !== 'Tümü' && <span className="ml-1.5 opacity-70">{visibleProjects.filter(p => p.status === s).length}</span>}
                 </button>
               ))}
               <div className="relative ml-auto">
@@ -838,7 +865,7 @@ function ProjectsPageInner() {
                   }}
                 >
                   {d}
-                  {d !== 'Tümü' && <span className="ml-1 opacity-80">{PROJECTS.filter(p => p.department.includes(d as Department)).length}</span>}
+                  {d !== 'Tümü' && <span className="ml-1 opacity-80">{visibleProjects.filter(p => p.department.includes(d as Department)).length}</span>}
                 </button>
               ))}
             </div>
@@ -847,7 +874,7 @@ function ProjectsPageInner() {
 
         {/* Tab content */}
         {activeTab === 'cards' && <ProjectCardsView projects={filtered} />}
-        {activeTab === 'gantt' && <ProjectGanttView projects={PROJECTS} search={search} statusFilter={statusFilter} deptFilter={deptFilter} />}
+        {activeTab === 'gantt' && <ProjectGanttView projects={visibleProjects} search={search} statusFilter={statusFilter} deptFilter={deptFilter} />}
         {activeTab === 'person' && <PersonTaskView />}
       </div>
 
