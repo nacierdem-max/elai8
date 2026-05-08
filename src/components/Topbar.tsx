@@ -1,21 +1,10 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import { Search, Bell, ChevronDown, Brain, RefreshCw } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Bell, ChevronDown } from 'lucide-react';
 import { useRole } from '@/context/RoleContext';
-
-const AI_STATUS_MESSAGES = [
-  'Görevler analiz ediliyor...',
-  'Risk tespiti yapıldı',
-  'Proje takvimi güncellendi',
-  'Ekip iş yükü dengelendi',
-  'Gecikme uyarısı gönderildi',
-  'Yeni öneri hazırlandı',
-];
 
 export default function Topbar() {
   const [searchVal, setSearchVal] = useState('');
-  const [aiStatusIdx, setAiStatusIdx] = useState(0);
-  const [aiPulse, setAiPulse] = useState(false);
   const { currentRole, roleDefinition } = useRole();
 
   const displayName = currentRole?.name ?? 'Kullanıcı';
@@ -23,37 +12,26 @@ export default function Topbar() {
   const roleColor = roleDefinition?.color ?? '#0071e3';
   const roleBg = roleDefinition?.bgColor ?? '#e8f0fb';
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setAiPulse(true);
-      setTimeout(() => {
-        setAiStatusIdx(i => (i + 1) % AI_STATUS_MESSAGES?.length);
-        setAiPulse(false);
-      }, 300);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <header
-      className="h-14 flex items-center gap-3 px-5 shrink-0"
+      className="h-14 flex items-center gap-4 px-6 shrink-0"
       style={{
         background: '#ffffff',
         borderBottom: '1px solid #e8e8ed',
       }}
     >
       {/* Search */}
-      <div className="flex-1 max-w-sm relative">
+      <div className="flex-1 max-w-xs relative">
         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#aeaeb2' }} />
         <input
           type="text"
-          placeholder="Ara... (⌘K)"
+          placeholder="Ara..."
           value={searchVal}
           onChange={(e) => setSearchVal(e?.target?.value)}
-          className="w-full rounded-xl pl-8 pr-4 py-2 text-sm focus:outline-none transition-all duration-150"
+          className="w-full rounded-lg pl-8 pr-4 py-2 text-sm focus:outline-none transition-colors"
           style={{
             background: '#f5f5f7',
-            border: '1px solid #e8e8ed',
+            border: '1px solid transparent',
             color: '#1d1d1f',
             fontSize: '13px',
           }}
@@ -61,65 +39,21 @@ export default function Topbar() {
       </div>
 
       <div className="flex items-center gap-2 ml-auto">
-        {/* AI Status ticker */}
-        <div
-          className="hidden lg:flex items-center gap-2 text-xs px-3 py-1.5 rounded-xl"
-          style={{ background: '#f0f7ff', color: '#0071e3', border: '1px solid rgba(0,113,227,0.12)' }}
-        >
-          <Brain size={11} className="shrink-0" />
-          <span
-            className={`transition-opacity duration-300 ${aiPulse ? 'opacity-0' : 'opacity-100'} max-w-[140px] truncate`}
-            style={{ fontSize: '12px' }}
-          >
-            {AI_STATUS_MESSAGES?.[aiStatusIdx]}
-          </span>
-        </div>
-
-        {/* Last updated */}
-        <div
-          className="hidden md:flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl"
-          style={{ background: '#f5f5f7', color: '#6e6e73', border: '1px solid #e8e8ed', fontSize: '12px' }}
-        >
-          <RefreshCw size={11} className="text-green-500" />
-          <span>05.05.2026</span>
-        </div>
-
-        {/* Live indicator */}
-        <div
-          className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-xl"
-          style={{ background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', fontSize: '12px' }}
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-          Canlı
-        </div>
-
         {/* Notifications */}
         <button
-          className="relative p-2 rounded-xl transition-all duration-150 hover:bg-gray-50"
+          className="relative p-2 rounded-lg transition-colors hover:bg-gray-50"
           style={{ color: '#6e6e73' }}
         >
-          <Bell size={17} />
+          <Bell size={16} />
           <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-red-500" />
         </button>
 
-        {/* Role badge */}
-        {roleDefinition && (
-          <div
-            className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold"
-            style={{ background: roleBg, color: roleColor, border: `1px solid ${roleColor}25`, fontSize: '12px' }}
-          >
-            <span>{roleDefinition?.icon}</span>
-            <span className="hidden lg:inline">{roleDefinition?.title}</span>
-          </div>
-        )}
-
         {/* User */}
         <button
-          className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl transition-all duration-150 hover:bg-gray-50"
-          style={{ border: '1px solid #e8e8ed' }}
+          className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-colors hover:bg-gray-50"
         >
           <div
-            className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
+            className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
             style={{ background: roleBg, color: roleColor }}
           >
             {displayInitials}

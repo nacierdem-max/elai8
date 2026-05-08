@@ -38,8 +38,6 @@ const KPI_CARDS = [
     iconColor: '#ef4444',
     iconBg: '#fef2f2',
     href: '/task-kanban-panel',
-    hero: false,
-    alert: true,
   },
   {
     id: 'kpi-risk',
@@ -53,8 +51,6 @@ const KPI_CARDS = [
     iconColor: '#f97316',
     iconBg: '#fff7ed',
     href: '/risks',
-    hero: false,
-    alert: true,
   },
   {
     id: 'kpi-plandisi',
@@ -68,7 +64,6 @@ const KPI_CARDS = [
     iconColor: '#8b5cf6',
     iconBg: '#f3f0ff',
     href: '/task-kanban-panel',
-    hero: false,
   },
   {
     id: 'kpi-personel',
@@ -82,7 +77,6 @@ const KPI_CARDS = [
     iconColor: '#22c55e',
     iconBg: '#f0fdf4',
     href: '/team',
-    hero: false,
   },
   {
     id: 'kpi-dosya',
@@ -96,7 +90,6 @@ const KPI_CARDS = [
     iconColor: '#06b6d4',
     iconBg: '#ecfeff',
     href: '/files',
-    hero: false,
     wide: true,
   },
 ];
@@ -110,59 +103,45 @@ export default function KPIBentoGrid() {
           <Link
             key={card?.id}
             href={card?.href}
-            className={`group rounded-2xl p-5 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5
-              ${card?.hero ? 'col-span-2 row-span-1' : ''}
+            className={`group rounded-xl p-4 transition-all duration-150 hover:shadow-sm
+              ${card?.hero ? 'col-span-2' : ''}
               ${card?.wide ? 'col-span-2' : ''}
             `}
             style={{
               background: '#ffffff',
-              border: card?.alert ? `1px solid ${card?.iconColor}30` : '1px solid #e8e8ed',
-              boxShadow: card?.alert
-                ? `0 0 0 1px ${card?.iconColor}15, 0 1px 4px rgba(0,0,0,0.04)`
-                : '0 1px 4px rgba(0,0,0,0.04)',
+              border: '1px solid #e8e8ed',
             }}
           >
-            <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center justify-between mb-3">
               <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
                 style={{ background: card?.iconBg }}
               >
-                <CardIcon size={17} style={{ color: card?.iconColor }} />
+                <CardIcon size={15} style={{ color: card?.iconColor }} />
               </div>
-              {card?.alert && (
-                <span
-                  className="text-xs font-semibold px-2 py-0.5 rounded-full"
-                  style={{ background: `${card?.iconColor}15`, color: card?.iconColor }}
-                >
-                  Dikkat
-                </span>
-              )}
             </div>
-            <p className="text-xs font-medium mb-1.5" style={{ color: '#aeaeb2', letterSpacing: '0.02em' }}>
+            <p className="text-xs font-medium mb-1" style={{ color: '#aeaeb2' }}>
               {card?.label}
             </p>
-            <div className={`flex items-baseline gap-2 ${card?.hero ? 'mb-3' : 'mb-2'}`}>
+            <div className="flex items-baseline gap-2 mb-1.5">
               <span
                 className="font-bold tabular-nums leading-none"
                 style={{
                   color: '#1d1d1f',
-                  fontSize: card?.hero ? '42px' : '28px',
+                  fontSize: card?.hero ? '36px' : '24px',
                   letterSpacing: '-0.02em',
                 }}
               >
                 {card?.value}
               </span>
             </div>
-            <p className="text-xs font-medium mb-0.5" style={{ color: card?.subColor }}>
+            <p className="text-xs" style={{ color: card?.subColor }}>
               {card?.sub}
-            </p>
-            <p className="text-xs" style={{ color: card?.trendUp ? '#22c55e' : '#ef4444' }}>
-              {card?.trend}
             </p>
             {/* Hero breakdown bars */}
             {card?.hero && card?.breakdown && (
-              <div className="mt-4 space-y-2.5">
-                <div className="flex gap-0.5 h-1.5 rounded-full overflow-hidden">
+              <div className="mt-4 space-y-2">
+                <div className="flex gap-0.5 h-1 rounded-full overflow-hidden">
                   {card?.breakdown?.map((b) => (
                     <div
                       key={`breakdown-${card?.id}-${b?.label}`}
@@ -171,7 +150,6 @@ export default function KPIBentoGrid() {
                         width: `${(b?.value / 920) * 100}%`,
                         minWidth: '3px',
                       }}
-                      title={`${b?.label}: ${b?.value}`}
                     />
                   ))}
                 </div>
@@ -180,7 +158,7 @@ export default function KPIBentoGrid() {
                     <div key={`legend-${card?.id}-${b?.label}`} className="flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: b?.color }} />
                       <span className="text-xs" style={{ color: '#6e6e73' }}>{b?.label}</span>
-                      <span className="text-xs font-semibold tabular-nums" style={{ color: b?.color }}>{b?.value}</span>
+                      <span className="text-xs font-semibold tabular-nums" style={{ color: '#1d1d1f' }}>{b?.value}</span>
                     </div>
                   ))}
                 </div>
