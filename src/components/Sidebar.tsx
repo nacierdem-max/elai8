@@ -1,9 +1,9 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AppLogo from '@/components/ui/AppLogo';
-import { LayoutDashboard, AlertTriangle, BarChart3, Settings, ChevronLeft, ChevronRight, Archive, LogOut, Layers, Brain, Zap } from 'lucide-react';
+import { LayoutDashboard, AlertTriangle, BarChart3, Settings, ChevronLeft, ChevronRight, Archive, LogOut, Layers, FolderKanban, Users, CheckSquare, Bot, Shield } from 'lucide-react';
 import { useRole } from '@/context/RoleContext';
 import { type PersonnelRoleKey } from '@/data/mockData';
 
@@ -19,27 +19,27 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { id: 'nav-dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-  { id: 'nav-workspace', label: 'Çalışma Alanı', icon: Layers, href: '/workspace', badge: 3, badgeColor: 'bg-blue-100 text-blue-600' },
+  { id: 'nav-projects', label: 'Projeler', icon: FolderKanban, href: '/projects' },
+  { id: 'nav-tasks', label: 'Görevler', icon: CheckSquare, href: '/task-kanban-panel' },
+  { id: 'nav-team', label: 'Ekip', icon: Users, href: '/team' },
+  { id: 'nav-workspace', label: 'Çalışma Alanı', icon: Layers, href: '/workspace' },
   {
-    id: 'nav-risks', label: 'Riskler', icon: AlertTriangle, href: '/risks', badge: 18, badgeColor: 'bg-orange-100 text-orange-500',
+    id: 'nav-risks', label: 'Riskler', icon: AlertTriangle, href: '/risks', badge: 6,
     allowedRoles: ['proje-lideri', 'departman-lideri', 'urun-yoneticisi', 'arge-temsilcisi', 'arge-yoneticisi'],
   },
   {
-    id: 'nav-logs', label: 'Log', icon: Archive, href: '/logs', badge: 11, badgeColor: 'bg-yellow-100 text-yellow-600',
+    id: 'nav-logs', label: 'Log', icon: Archive, href: '/logs',
     allowedRoles: ['proje-lideri', 'departman-lideri', 'urun-yoneticisi', 'arge-temsilcisi', 'arge-yoneticisi'],
   },
   {
-    id: 'nav-analytics', label: 'AI Asistan', icon: BarChart3, href: '/analytics',
+    id: 'nav-analytics', label: 'Analitik', icon: BarChart3, href: '/analytics',
     allowedRoles: ['departman-lideri', 'urun-yoneticisi', 'arge-temsilcisi', 'arge-yoneticisi'],
   },
-];
-
-const AI_TASKS = [
-  'Görev önceliklendiriliyor',
-  'Risk analizi yapılıyor',
-  'Takvim optimize ediliyor',
-  'Ekip yükü dengeleniyor',
-  'Rapor hazırlanıyor',
+  { id: 'nav-ai', label: 'AI Asistan', icon: Bot, href: '/ai-assistant' },
+  {
+    id: 'nav-permissions', label: 'İzin Yönetimi', icon: Shield, href: '/permissions',
+    allowedRoles: ['proje-lideri', 'departman-lideri', 'urun-yoneticisi', 'arge-temsilcisi', 'arge-yoneticisi'],
+  },
 ];
 
 interface SidebarProps {
@@ -48,21 +48,8 @@ interface SidebarProps {
 
 export default function Sidebar({ currentPath = '/dashboard' }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
-  const [aiTaskIdx, setAiTaskIdx] = useState(0);
-  const [aiActive, setAiActive] = useState(true);
   const { currentRole, roleDefinition, clearRole } = useRole();
   const router = useRouter();
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setAiActive(false);
-      setTimeout(() => {
-        setAiTaskIdx(i => (i + 1) % AI_TASKS.length);
-        setAiActive(true);
-      }, 400);
-    }, 3500);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleLogout = () => {
     clearRole();
@@ -84,108 +71,69 @@ export default function Sidebar({ currentPath = '/dashboard' }: SidebarProps) {
     <aside
       className="flex flex-col shrink-0 z-20 transition-all duration-300 ease-in-out"
       style={{
-        width: collapsed ? '64px' : '240px',
-        background: 'rgba(255,255,255,0.92)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderRight: '1px solid #d2d2d7',
+        width: collapsed ? '56px' : '220px',
+        background: '#ffffff',
+        borderRight: '1px solid #e8e8ed',
       }}
     >
       {/* Logo */}
       <div
         className={`flex items-center h-14 px-3 ${collapsed ? 'justify-center' : 'justify-between'}`}
-        style={{ borderBottom: '1px solid #e8e8ed' }}
+        style={{ borderBottom: '1px solid #f0f0f5' }}
       >
-        <div className="flex items-center gap-2 min-w-0">
-          <AppLogo size={32} />
-          {!collapsed && (
-            <div className="min-w-0">
-              <span className="font-bold text-sm tracking-tight block" style={{ color: '#1d1d1f' }}>EliarArGe</span>
-              <span className="text-xs block leading-none flex items-center gap-1" style={{ color: '#0071e3' }}>
-                <Zap size={9} />
-                AI Destekli
-              </span>
-            </div>
-          )}
-        </div>
         {!collapsed && (
-          <button
-            onClick={() => setCollapsed(true)}
-            className="p-1 rounded-lg transition-all duration-150"
-            style={{ color: '#6e6e73' }}
-            title="Daralt"
-          >
-            <ChevronLeft size={16} />
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#0071e3' }}>
+              <AppLogo size={16} />
+            </div>
+            <span className="font-semibold text-sm" style={{ color: '#1d1d1f', letterSpacing: '-0.01em' }}>EliarArGe</span>
+          </div>
+        )}
+        {collapsed && (
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#0071e3' }}>
+            <AppLogo size={16} />
+          </div>
+        )}
+        {!collapsed && (
+          <button onClick={() => setCollapsed(true)} className="p-1.5 rounded-md transition-colors hover:bg-gray-100" style={{ color: '#aeaeb2' }}>
+            <ChevronLeft size={14} />
           </button>
         )}
       </div>
 
       {collapsed && (
-        <button
-          onClick={() => setCollapsed(false)}
-          className="flex justify-center py-2 transition-all duration-150"
-          style={{ color: '#6e6e73' }}
-          title="Genişlet"
-        >
-          <ChevronRight size={16} />
+        <button onClick={() => setCollapsed(false)} className="flex justify-center py-2 transition-colors hover:bg-gray-50" style={{ color: '#aeaeb2' }}>
+          <ChevronRight size={14} />
         </button>
       )}
 
-      {/* AI Status Banner */}
-      {!collapsed && (
-        <div className="mx-2 mt-2 rounded-xl px-3 py-2.5 flex items-center gap-2" style={{ background: 'linear-gradient(135deg, #f0f7ff, #e8f0fb)', border: '1px solid #0071e320' }}>
-          <div className="relative shrink-0">
-            <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0071e3, #5ac8fa)' }}>
-              <Brain size={12} className="text-white" />
-            </div>
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-400 border border-white" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold" style={{ color: '#0071e3' }}>AI Aktif</p>
-            <p className={`text-xs truncate transition-opacity duration-300 ${aiActive ? 'opacity-100' : 'opacity-0'}`} style={{ color: '#6e6e73' }}>
-              {AI_TASKS[aiTaskIdx]}
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
-        {!collapsed && (
-          <p className="text-xs font-semibold uppercase tracking-widest px-2 pb-2 pt-1" style={{ color: '#6e6e73' }}>
-            Modüller
-          </p>
-        )}
+      <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-0.5">
         {visibleItems.map((item) => {
           const NavIcon = item.icon;
-          const active = item.href === currentPath || (item.id === 'nav-dashboard' && currentPath === '/dashboard');
+          const active = item.href === currentPath || (item.href !== '/dashboard' && currentPath?.startsWith(item.href));
 
           return (
             <Link
               key={item.id}
               href={item.href}
               title={collapsed ? item.label : undefined}
-              className={`flex items-center gap-3 px-2 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group relative
-                ${collapsed ? 'justify-center' : ''}
-              `}
+              className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors ${collapsed ? 'justify-center' : ''}`}
               style={{
-                background: active ? '#e8f0fb' : 'transparent',
+                background: active ? '#f0f7ff' : 'transparent',
                 color: active ? '#0071e3' : '#3a3a3c',
               }}
             >
-              <NavIcon size={18} className="shrink-0" />
+              <NavIcon size={16} className="shrink-0" />
               {!collapsed && (
                 <>
                   <span className="flex-1 truncate">{item.label}</span>
                   {item.badge !== undefined && (
-                    <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-md ${item.badgeColor || 'bg-gray-100 text-gray-500'}`}>
+                    <span className="text-xs font-semibold px-1.5 py-0.5 rounded-md tabular-nums" style={{ background: '#fef2f2', color: '#ef4444' }}>
                       {item.badge}
                     </span>
                   )}
                 </>
-              )}
-              {collapsed && item.badge !== undefined && (
-                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500" />
               )}
             </Link>
           );
@@ -193,42 +141,46 @@ export default function Sidebar({ currentPath = '/dashboard' }: SidebarProps) {
       </nav>
 
       {/* Bottom */}
-      <div className="p-2 space-y-0.5" style={{ borderTop: '1px solid #e8e8ed' }}>
+      <div className="p-2 space-y-0.5" style={{ borderTop: '1px solid #f0f0f5' }}>
         <Link
-          href="/dashboard"
-          className={`flex items-center gap-3 px-2 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${collapsed ? 'justify-center' : ''}`}
+          href="/settings"
+          className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-gray-50 ${collapsed ? 'justify-center' : ''}`}
           style={{ color: '#6e6e73' }}
           title={collapsed ? 'Ayarlar' : undefined}
         >
-          <Settings size={18} className="shrink-0" />
+          <Settings size={16} className="shrink-0" />
           {!collapsed && <span>Ayarlar</span>}
         </Link>
 
         <button
           onClick={handleLogout}
-          className={`w-full flex items-center gap-3 px-2 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 hover:bg-red-50 ${collapsed ? 'justify-center' : ''}`}
+          className={`w-full flex items-center gap-3 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-red-50 ${collapsed ? 'justify-center' : ''}`}
           style={{ color: '#ef4444' }}
           title={collapsed ? 'Çıkış Yap' : undefined}
         >
-          <LogOut size={18} className="shrink-0" />
+          <LogOut size={16} className="shrink-0" />
           {!collapsed && <span>Çıkış Yap</span>}
         </button>
 
-        {/* Current user/role */}
-        <div className={`flex items-center gap-2 px-2 py-2 rounded-xl mt-1 ${collapsed ? 'justify-center' : ''}`} style={{ background: '#f5f5f7' }}>
-          <div
-            className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-            style={{ background: roleBg, color: roleColor }}
-          >
-            {displayInitials}
-          </div>
-          {!collapsed && (
+        {/* Current user */}
+        {!collapsed && (
+          <div className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg mt-1" style={{ background: '#f5f5f7' }}>
+            <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background: roleBg, color: roleColor }}>
+              {displayInitials}
+            </div>
             <div className="min-w-0">
               <p className="text-xs font-semibold truncate" style={{ color: '#1d1d1f' }}>{displayName}</p>
-              <p className="text-xs truncate" style={{ color: roleColor }}>{roleDefinition?.title ?? 'Rol seçilmedi'}</p>
+              <p className="text-xs truncate" style={{ color: '#6e6e73' }}>{roleDefinition?.title ?? 'Rol seçilmedi'}</p>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+        {collapsed && (
+          <div className="flex justify-center py-1">
+            <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: roleBg, color: roleColor }}>
+              {displayInitials}
+            </div>
+          </div>
+        )}
       </div>
     </aside>
   );

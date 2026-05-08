@@ -1,5 +1,9 @@
 'use client';
 import React from 'react';
+import { useRole } from '@/context/RoleContext';
+import { TASKS, PROJECTS, RISKS } from '@/data/mockData';
+import Link from 'next/link';
+import { Shield, Bot, FolderKanban, CheckSquare } from 'lucide-react';
 
 import KPIBentoGrid from './KPIBentoGrid';
 import AIQueryBar from './AIQueryBar';
@@ -7,122 +11,109 @@ import WorkloadChartSection from './WorkloadChartSection';
 import RiskAlertList from './RiskAlertList';
 import ActivityFeed from './ActivityFeed';
 import TopEngineersWorkload from './TopEngineersWorkload';
-import { Brain, TrendingUp, CheckCircle2, Clock } from 'lucide-react';
+import Icon from '@/components/ui/AppIcon';
 
-// Role-specific quick access links shown in the welcome banner
-const ROLE_QUICK_LINKS: Record<PersonnelRoleKey, { label: string; href: string; emoji: string }[]> = {
-  'arge-personeli': [
-    { label: 'Görevlerim', href: '/task-kanban-panel', emoji: '📋' },
-    { label: 'Ekip', href: '/team', emoji: '👥' },
-    { label: 'Dosyalar', href: '/files', emoji: '📁' },
-  ],
-  'proje-lideri': [
-    { label: 'Projeler', href: '/projects', emoji: '🗂️' },
-    { label: 'Riskler', href: '/risks', emoji: '⚠️' },
-    { label: 'Ekip Takvimi', href: '/team', emoji: '📅' },
-    { label: 'Log', href: '/logs', emoji: '📊' },
-  ],
-  'departman-lideri': [
-    { label: 'Projeler', href: '/projects', emoji: '🗂️' },
-    { label: 'Ekip & Personel', href: '/team', emoji: '👥' },
-    { label: 'Analytics', href: '/analytics', emoji: '📈' },
-    { label: 'Riskler', href: '/risks', emoji: '⚠️' },
-  ],
-  'urun-yoneticisi': [
-    { label: 'Projeler', href: '/projects', emoji: '🗂️' },
-    { label: 'AI Asistan', href: '/analytics', emoji: '🤖' },
-    { label: 'Riskler', href: '/risks', emoji: '⚠️' },
-    { label: 'Log', href: '/logs', emoji: '📊' },
-  ],
-  'arge-temsilcisi': [
-    { label: 'Log', href: '/logs', emoji: '📊' },
-    { label: 'Analytics', href: '/analytics', emoji: '📈' },
-    { label: 'Projeler', href: '/projects', emoji: '🗂️' },
-    { label: 'Riskler', href: '/risks', emoji: '⚠️' },
-  ],
-  'arge-yoneticisi': [
-    { label: 'Projeler', href: '/projects', emoji: '🗂️' },
-    { label: 'AI Asistan', href: '/analytics', emoji: '🤖' },
-    { label: 'Log', href: '/logs', emoji: '📊' },
-    { label: 'Riskler', href: '/risks', emoji: '⚠️' },
-    { label: 'Ekip', href: '/team', emoji: '👥' },
-  ],
-};
-
-const AI_ACTIONS = [
-  { icon: '📋', label: 'Görev Ata', desc: 'AI personele görev atar', color: '#0071e3', bg: '#e8f0fb' },
-  { icon: '⚠️', label: 'Risk Analiz', desc: 'Riskleri önceliklendir', color: '#f97316', bg: '#fff7ed' },
-  { icon: '📅', label: 'Takvim Planla', desc: 'Projeyi otomatik planla', color: '#8b5cf6', bg: '#f3f0ff' },
-  { icon: '👥', label: 'Ekip Dengele', desc: 'İş yükünü optimize et', color: '#22c55e', bg: '#f0fdf4' },
-  { icon: '📊', label: 'Rapor Al', desc: 'Anlık durum raporu', color: '#06b6d4', bg: '#ecfeff' },
-  { icon: '🔔', label: 'Uyarı Gönder', desc: 'Ekibe bildirim yolla', color: '#eab308', bg: '#fefce8' },
-];
 
 export default function DashboardContent() {
+  const { currentRole, currentPerson, canViewAllData, isTeamLeader, isAdmin } = useRole();
+
+  // Personal stats for non-admin users
+  const myTasks = currentRole?.personId
+    ? TASKS.filter(t => t.assigneeId === currentRole.personId || (t.collaboratorIds || []).includes(currentRole.personId!))
+    : [];
+  const myProjects = currentRole?.personId
+    ? PROJECTS.filter(p => p.leadId === currentRole.personId || (p.collaboratorIds || []).includes(currentRole.personId!))
+    : [];
+  const myRisks = myProjects.length > 0
+    ? RISKS.filter(r => myProjects.some(p => p.id === r.projectId) && r.status !== 'Kapatıldı')
+    : [];
+
+  const isPersonnel = !canViewAllData && !isTeamLeader;
+
   return (
     <div className="space-y-6">
-      {/* AI Hero Banner */}
-      <div className="rounded-2xl overflow-hidden relative" style={{ background: 'linear-gradient(135deg, #0071e3 0%, #5ac8fa 50%, #34d399 100%)' }}>
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-        <div className="relative px-6 py-5 flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-white/20 backdrop-blur-sm border border-white/30">
-              <Brain size={24} className="text-white" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-lg font-bold text-white">AI İş Yönetim Asistanı</h2>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/20 text-white border border-white/30">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-300 inline-block mr-1 animate-pulse" />
-                  Aktif
-                </span>
-              </div>
-              <p className="text-sm text-white/80">Sadece söyleyin — AI görev atar, proje planlar, ekibi organize eder</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-xl bg-white/20 text-white border border-white/20">
-              <CheckCircle2 size={12} />
-              39 görev tamamlandı
-            </div>
-            <div className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-xl bg-white/20 text-white border border-white/20">
-              <TrendingUp size={12} />
-              %78 verimlilik
-            </div>
-            <div className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-xl bg-white/20 text-white border border-white/20">
-              <Clock size={12} />
-              Gerçek zamanlı
-            </div>
-          </div>
+      {/* Page Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold" style={{ color: '#1d1d1f', letterSpacing: '-0.02em' }}>
+            {currentPerson ? `Merhaba, ${currentPerson.name.split(' ')[0]} 👋` : 'Dashboard'}
+          </h1>
+          <p className="text-sm mt-1" style={{ color: '#6e6e73' }}>
+            {isPersonnel
+              ? `${myTasks.filter(t => t.status !== 'Tamamlandı').length} aktif görev · ${myProjects.length} proje`
+              : 'Ar-Ge Merkezi genel durumu'
+            }
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link href="/ai-assistant" className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all" style={{ background: 'linear-gradient(135deg, #0071e3, #5856d6)', color: '#fff' }}>
+            <Bot size={13} /> AI Asistan
+          </Link>
         </div>
       </div>
 
-      {/* AI Quick Actions */}
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-        {AI_ACTIONS.map(action => (
-          <button
-            key={action.label}
-            className="rounded-2xl p-3 text-center border border-border hover:scale-105 transition-all duration-150 hover:shadow-md group"
-            style={{ background: action.bg }}
-          >
-            <div className="text-2xl mb-1.5">{action.icon}</div>
-            <p className="text-xs font-bold" style={{ color: action.color }}>{action.label}</p>
-            <p className="text-xs text-muted-foreground mt-0.5 hidden sm:block leading-tight">{action.desc}</p>
-          </button>
-        ))}
-      </div>
+      {/* Personal quick stats for personnel role */}
+      {isPersonnel && currentRole?.personId && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            { label: 'Aktif Görevim', value: myTasks.filter(t => !['Tamamlandı'].includes(t.status)).length, color: '#0071e3', href: '/task-kanban-panel', icon: CheckSquare },
+            { label: 'Gecikmiş', value: myTasks.filter(t => t.status === 'Gecikmiş').length, color: '#ef4444', href: '/task-kanban-panel', icon: CheckSquare },
+            { label: 'Projelerim', value: myProjects.length, color: '#8b5cf6', href: '/projects', icon: FolderKanban },
+            { label: 'Aktif Risk', value: myRisks.length, color: '#f97316', href: '/risks', icon: Shield },
+          ].map(stat => {
+            const Icon = stat.icon;
+            return (
+              <Link key={stat.label} href={stat.href} className="rounded-xl p-4 border border-border hover:shadow-sm transition-all" style={{ background: '#fff' }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${stat.color}18` }}>
+                    <Icon size={13} style={{ color: stat.color }} />
+                  </div>
+                </div>
+                <p className="text-2xl font-bold tabular-nums" style={{ color: stat.color }}>{stat.value}</p>
+                <p className="text-xs mt-0.5" style={{ color: '#6e6e73' }}>{stat.label}</p>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+
+      {/* My projects quick access for personnel */}
+      {isPersonnel && myProjects.length > 0 && (
+        <div className="rounded-xl border border-border p-4" style={{ background: '#fff' }}>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-bold text-foreground">Projelerim</h3>
+            <Link href="/projects" className="text-xs text-primary hover:underline">Tümünü Gör →</Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {myProjects.slice(0, 4).map(p => {
+              const statusColors: Record<string, string> = { Aktif: '#22c55e', Kritik: '#ef4444', Tamamlandı: '#3b7dd8', Beklemede: '#eab308' };
+              const sc = statusColors[p.status] || '#94a3b8';
+              return (
+                <Link key={p.id} href={`/projects/${p.id}`} className="flex items-center gap-3 p-3 rounded-xl border border-border hover:border-primary/30 hover:bg-primary/5 transition-all">
+                  <div className="w-2 h-2 rounded-full shrink-0" style={{ background: sc }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-foreground truncate">{p.name}</p>
+                    <p className="text-xs text-muted-foreground">{p.completionPercent}% tamamlandı</p>
+                  </div>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full shrink-0" style={{ background: `${sc}18`, color: sc }}>{p.status}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* KPI Grid — only for admin/leader */}
+      {!isPersonnel && <KPIBentoGrid />}
 
       {/* AI Query Bar */}
       <AIQueryBar />
 
-      {/* KPI Bento Grid */}
-      <KPIBentoGrid />
+      {/* Charts — only for admin/leader */}
+      {!isPersonnel && <WorkloadChartSection />}
 
-      {/* Charts row */}
-      <WorkloadChartSection />
-
-      {/* Bottom row: Risk alerts + Activity + Top engineers */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-6">
+      {/* Bottom row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <RiskAlertList />
         <ActivityFeed />
         <TopEngineersWorkload />

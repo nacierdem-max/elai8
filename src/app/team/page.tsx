@@ -1,21 +1,36 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import AppLayout from '@/components/AppLayout';
 import { PERSONS, DEPARTMENT_COLORS, type Person, type Department } from '@/data/mockData';
 import { Users, Search, Filter, X, ChevronRight, AlertTriangle, BarChart2 } from 'lucide-react';
 import MemberInlineDetail from './components/MemberInlineDetail';
 import TeamGanttView from './components/TeamGanttView';
 import PersonnelOrgChart from './components/PersonnelOrgChart';
+import { useSearchParams } from 'next/navigation';
 
 const DEPARTMENTS: Department[] = ['Elektronik', 'Yazılım', 'Mekanik', 'Test', 'Otomasyon', 'Donanım', 'Saha', 'Ürün', 'Lojistik', 'Destek'];
 
 type PageView = 'grid' | 'gantt' | 'orgchart';
 
-export default function TeamPage() {
+function TeamPageInner() {
   const [search, setSearch] = useState('');
   const [selectedDept, setSelectedDept] = useState<Department | 'Tümü'>('Tümü');
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
   const [pageView, setPageView] = useState<PageView>('gantt');
+  const searchParams = useSearchParams();
+
+  // Auto-select person from URL param ?person=p-xxx
+  useEffect(() => {
+    const personId = searchParams.get('person');
+    if (personId) {
+      const found = PERSONS.find(p => p.id === personId);
+      if (found) {
+        setSelectedPerson(found);
+        setPageView('grid');
+        setSelectedDept(found.department);
+      }
+    }
+  }, [searchParams]);
 
   const filtered = PERSONS.filter(p => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -243,5 +258,13 @@ export default function TeamPage() {
         )}
       </div>
     </AppLayout>
+  );
+}
+
+export default function TeamPage() {
+  return (
+    <Suspense fallback={null}>
+      <TeamPageInner />
+    </Suspense>
   );
 }
