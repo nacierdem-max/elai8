@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, ChevronDown, Brain, RefreshCw, Sparkles } from 'lucide-react';
+import { Search, Bell, ChevronDown, Brain, RefreshCw } from 'lucide-react';
 import { useRole } from '@/context/RoleContext';
 
 const AI_STATUS_MESSAGES = [
@@ -36,77 +36,77 @@ export default function Topbar() {
 
   return (
     <header
-      className="h-14 flex items-center gap-4 px-6 shrink-0"
+      className="h-14 flex items-center gap-3 px-5 shrink-0"
       style={{
-        background: 'rgba(255,255,255,0.92)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid #d2d2d7',
+        background: '#ffffff',
+        borderBottom: '1px solid #e8e8ed',
       }}
     >
       {/* Search */}
-      <div className="flex-1 max-w-md relative">
-        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#6e6e73' }} />
+      <div className="flex-1 max-w-sm relative">
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#aeaeb2' }} />
         <input
           type="text"
-          placeholder="Proje, görev, kişi ara... (⌘K)"
+          placeholder="Ara... (⌘K)"
           value={searchVal}
           onChange={(e) => setSearchVal(e?.target?.value)}
-          className="w-full rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none transition-all duration-150"
+          className="w-full rounded-xl pl-8 pr-4 py-2 text-sm focus:outline-none transition-all duration-150"
           style={{
             background: '#f5f5f7',
-            border: '1px solid #d2d2d7',
+            border: '1px solid #e8e8ed',
             color: '#1d1d1f',
+            fontSize: '13px',
           }}
         />
       </div>
+
       <div className="flex items-center gap-2 ml-auto">
         {/* AI Status ticker */}
         <div
-          className="hidden lg:flex items-center gap-2 text-xs px-3 py-1.5 rounded-xl transition-all duration-300"
-          style={{ background: '#f0f7ff', color: '#0071e3', border: '1px solid #0071e320' }}
+          className="hidden lg:flex items-center gap-2 text-xs px-3 py-1.5 rounded-xl"
+          style={{ background: '#f0f7ff', color: '#0071e3', border: '1px solid rgba(0,113,227,0.12)' }}
         >
-          <Brain size={12} className="shrink-0" />
-          <span className={`transition-opacity duration-300 ${aiPulse ? 'opacity-0' : 'opacity-100'} max-w-[160px] truncate`}>
+          <Brain size={11} className="shrink-0" />
+          <span
+            className={`transition-opacity duration-300 ${aiPulse ? 'opacity-0' : 'opacity-100'} max-w-[140px] truncate`}
+            style={{ fontSize: '12px' }}
+          >
             {AI_STATUS_MESSAGES?.[aiStatusIdx]}
           </span>
         </div>
 
         {/* Last updated */}
-        <div className="hidden md:flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl" style={{ background: '#f5f5f7', color: '#6e6e73', border: '1px solid #e8e8ed' }}>
-          <RefreshCw size={12} className="text-green-500" />
-          <span>05.05.2026 14:21</span>
+        <div
+          className="hidden md:flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl"
+          style={{ background: '#f5f5f7', color: '#6e6e73', border: '1px solid #e8e8ed', fontSize: '12px' }}
+        >
+          <RefreshCw size={11} className="text-green-500" />
+          <span>05.05.2026</span>
         </div>
 
         {/* Live indicator */}
-        <div className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-xl" style={{ background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }}>
+        <div
+          className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-xl"
+          style={{ background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', fontSize: '12px' }}
+        >
           <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
           Canlı
         </div>
 
         {/* Notifications */}
         <button
-          className="relative p-2 rounded-xl transition-all duration-150 hover:bg-muted/50"
+          className="relative p-2 rounded-xl transition-all duration-150 hover:bg-gray-50"
           style={{ color: '#6e6e73' }}
         >
-          <Bell size={18} />
-          <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500" />
-        </button>
-
-        {/* AI Assistant button */}
-        <button
-          className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-150 hover:opacity-90 hover:scale-105 shadow-sm"
-          style={{ background: 'linear-gradient(135deg, #0071e3, #5ac8fa)', color: 'white' }}
-        >
-          <Sparkles size={14} />
-          AI Asistan
+          <Bell size={17} />
+          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-red-500" />
         </button>
 
         {/* Role badge */}
         {roleDefinition && (
           <div
             className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold"
-            style={{ background: roleBg, color: roleColor, border: `1px solid ${roleColor}30` }}
+            style={{ background: roleBg, color: roleColor, border: `1px solid ${roleColor}25`, fontSize: '12px' }}
           >
             <span>{roleDefinition?.icon}</span>
             <span className="hidden lg:inline">{roleDefinition?.title}</span>
@@ -114,15 +114,18 @@ export default function Topbar() {
         )}
 
         {/* User */}
-        <button className="flex items-center gap-2 px-2 py-1.5 rounded-xl transition-all duration-150 hover:bg-gray-100">
+        <button
+          className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl transition-all duration-150 hover:bg-gray-50"
+          style={{ border: '1px solid #e8e8ed' }}
+        >
           <div
-            className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+            className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
             style={{ background: roleBg, color: roleColor }}
           >
             {displayInitials}
           </div>
-          <span className="text-sm font-medium hidden md:block" style={{ color: '#1d1d1f' }}>{displayName}</span>
-          <ChevronDown size={14} className="hidden md:block" style={{ color: '#6e6e73' }} />
+          <span className="text-sm font-medium hidden md:block" style={{ color: '#1d1d1f', fontSize: '13px' }}>{displayName}</span>
+          <ChevronDown size={12} className="hidden md:block" style={{ color: '#aeaeb2' }} />
         </button>
       </div>
     </header>

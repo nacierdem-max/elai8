@@ -19,13 +19,13 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { id: 'nav-dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-  { id: 'nav-workspace', label: 'Çalışma Alanı', icon: Layers, href: '/workspace', badge: 3, badgeColor: 'bg-blue-100 text-blue-600' },
+  { id: 'nav-workspace', label: 'Çalışma Alanı', icon: Layers, href: '/workspace', badge: 3, badgeColor: '#0071e3' },
   {
-    id: 'nav-risks', label: 'Riskler', icon: AlertTriangle, href: '/risks', badge: 18, badgeColor: 'bg-orange-100 text-orange-500',
+    id: 'nav-risks', label: 'Riskler', icon: AlertTriangle, href: '/risks', badge: 18, badgeColor: '#f97316',
     allowedRoles: ['proje-lideri', 'departman-lideri', 'urun-yoneticisi', 'arge-temsilcisi', 'arge-yoneticisi'],
   },
   {
-    id: 'nav-logs', label: 'Log', icon: Archive, href: '/logs', badge: 11, badgeColor: 'bg-yellow-100 text-yellow-600',
+    id: 'nav-logs', label: 'Log', icon: Archive, href: '/logs', badge: 11, badgeColor: '#eab308',
     allowedRoles: ['proje-lideri', 'departman-lideri', 'urun-yoneticisi', 'arge-temsilcisi', 'arge-yoneticisi'],
   },
   {
@@ -84,23 +84,26 @@ export default function Sidebar({ currentPath = '/dashboard' }: SidebarProps) {
     <aside
       className="flex flex-col shrink-0 z-20 transition-all duration-300 ease-in-out"
       style={{
-        width: collapsed ? '64px' : '240px',
-        background: 'rgba(255,255,255,0.92)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderRight: '1px solid #d2d2d7',
+        width: collapsed ? '60px' : '232px',
+        background: '#ffffff',
+        borderRight: '1px solid #e8e8ed',
       }}
     >
       {/* Logo */}
       <div
         className={`flex items-center h-14 px-3 ${collapsed ? 'justify-center' : 'justify-between'}`}
-        style={{ borderBottom: '1px solid #e8e8ed' }}
+        style={{ borderBottom: '1px solid #f0f0f5' }}
       >
-        <div className="flex items-center gap-2 min-w-0">
-          <AppLogo size={32} />
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div
+            className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: 'linear-gradient(145deg, #0071e3, #0077ed)', boxShadow: '0 2px 8px rgba(0,113,227,0.2)' }}
+          >
+            <AppLogo size={18} />
+          </div>
           {!collapsed && (
             <div className="min-w-0">
-              <span className="font-bold text-sm tracking-tight block" style={{ color: '#1d1d1f' }}>EliarArGe</span>
+              <span className="font-bold text-sm tracking-tight block" style={{ color: '#1d1d1f', letterSpacing: '-0.01em' }}>EliarArGe</span>
               <span className="text-xs block leading-none flex items-center gap-1" style={{ color: '#0071e3' }}>
                 <Zap size={9} />
                 AI Destekli
@@ -111,11 +114,11 @@ export default function Sidebar({ currentPath = '/dashboard' }: SidebarProps) {
         {!collapsed && (
           <button
             onClick={() => setCollapsed(true)}
-            className="p-1 rounded-lg transition-all duration-150"
-            style={{ color: '#6e6e73' }}
+            className="p-1.5 rounded-lg transition-all duration-150 hover:bg-gray-100"
+            style={{ color: '#aeaeb2' }}
             title="Daralt"
           >
-            <ChevronLeft size={16} />
+            <ChevronLeft size={14} />
           </button>
         )}
       </div>
@@ -123,26 +126,35 @@ export default function Sidebar({ currentPath = '/dashboard' }: SidebarProps) {
       {collapsed && (
         <button
           onClick={() => setCollapsed(false)}
-          className="flex justify-center py-2 transition-all duration-150"
-          style={{ color: '#6e6e73' }}
+          className="flex justify-center py-2.5 transition-all duration-150 hover:bg-gray-50"
+          style={{ color: '#aeaeb2' }}
           title="Genişlet"
         >
-          <ChevronRight size={16} />
+          <ChevronRight size={14} />
         </button>
       )}
 
       {/* AI Status Banner */}
       {!collapsed && (
-        <div className="mx-2 mt-2 rounded-xl px-3 py-2.5 flex items-center gap-2" style={{ background: 'linear-gradient(135deg, #f0f7ff, #e8f0fb)', border: '1px solid #0071e320' }}>
+        <div
+          className="mx-3 mt-3 rounded-xl px-3 py-2.5 flex items-center gap-2.5"
+          style={{ background: '#f0f7ff', border: '1px solid rgba(0,113,227,0.12)' }}
+        >
           <div className="relative shrink-0">
-            <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0071e3, #5ac8fa)' }}>
+            <div
+              className="w-6 h-6 rounded-lg flex items-center justify-center"
+              style={{ background: '#0071e3' }}
+            >
               <Brain size={12} className="text-white" />
             </div>
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-400 border border-white" />
+            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-400 border-2 border-white" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold" style={{ color: '#0071e3' }}>AI Aktif</p>
-            <p className={`text-xs truncate transition-opacity duration-300 ${aiActive ? 'opacity-100' : 'opacity-0'}`} style={{ color: '#6e6e73' }}>
+            <p
+              className={`text-xs truncate transition-opacity duration-300 ${aiActive ? 'opacity-100' : 'opacity-0'}`}
+              style={{ color: '#6e6e73' }}
+            >
               {AI_TASKS[aiTaskIdx]}
             </p>
           </div>
@@ -152,7 +164,7 @@ export default function Sidebar({ currentPath = '/dashboard' }: SidebarProps) {
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
         {!collapsed && (
-          <p className="text-xs font-semibold uppercase tracking-widest px-2 pb-2 pt-1" style={{ color: '#6e6e73' }}>
+          <p className="text-xs font-semibold uppercase tracking-widest px-2 pb-2 pt-1" style={{ color: '#aeaeb2', fontSize: '10px' }}>
             Modüller
           </p>
         )}
@@ -165,7 +177,7 @@ export default function Sidebar({ currentPath = '/dashboard' }: SidebarProps) {
               key={item.id}
               href={item.href}
               title={collapsed ? item.label : undefined}
-              className={`flex items-center gap-3 px-2 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group relative
+              className={`flex items-center gap-3 px-2.5 py-2 rounded-xl text-sm font-medium transition-all duration-150 group relative
                 ${collapsed ? 'justify-center' : ''}
               `}
               style={{
@@ -173,19 +185,25 @@ export default function Sidebar({ currentPath = '/dashboard' }: SidebarProps) {
                 color: active ? '#0071e3' : '#3a3a3c',
               }}
             >
-              <NavIcon size={18} className="shrink-0" />
+              <NavIcon size={17} className="shrink-0" />
               {!collapsed && (
                 <>
-                  <span className="flex-1 truncate">{item.label}</span>
+                  <span className="flex-1 truncate text-sm">{item.label}</span>
                   {item.badge !== undefined && (
-                    <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-md ${item.badgeColor || 'bg-gray-100 text-gray-500'}`}>
+                    <span
+                      className="text-xs font-semibold px-1.5 py-0.5 rounded-md min-w-[20px] text-center"
+                      style={{ background: `${item.badgeColor}18`, color: item.badgeColor }}
+                    >
                       {item.badge}
                     </span>
                   )}
                 </>
               )}
               {collapsed && item.badge !== undefined && (
-                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500" />
+                <span
+                  className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full"
+                  style={{ background: item.badgeColor }}
+                />
               )}
             </Link>
           );
@@ -193,29 +211,32 @@ export default function Sidebar({ currentPath = '/dashboard' }: SidebarProps) {
       </nav>
 
       {/* Bottom */}
-      <div className="p-2 space-y-0.5" style={{ borderTop: '1px solid #e8e8ed' }}>
+      <div className="p-2 space-y-0.5" style={{ borderTop: '1px solid #f0f0f5' }}>
         <Link
           href="/dashboard"
-          className={`flex items-center gap-3 px-2 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${collapsed ? 'justify-center' : ''}`}
+          className={`flex items-center gap-3 px-2.5 py-2 rounded-xl text-sm font-medium transition-all duration-150 hover:bg-gray-50 ${collapsed ? 'justify-center' : ''}`}
           style={{ color: '#6e6e73' }}
           title={collapsed ? 'Ayarlar' : undefined}
         >
-          <Settings size={18} className="shrink-0" />
+          <Settings size={17} className="shrink-0" />
           {!collapsed && <span>Ayarlar</span>}
         </Link>
 
         <button
           onClick={handleLogout}
-          className={`w-full flex items-center gap-3 px-2 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 hover:bg-red-50 ${collapsed ? 'justify-center' : ''}`}
+          className={`w-full flex items-center gap-3 px-2.5 py-2 rounded-xl text-sm font-medium transition-all duration-150 hover:bg-red-50 ${collapsed ? 'justify-center' : ''}`}
           style={{ color: '#ef4444' }}
           title={collapsed ? 'Çıkış Yap' : undefined}
         >
-          <LogOut size={18} className="shrink-0" />
+          <LogOut size={17} className="shrink-0" />
           {!collapsed && <span>Çıkış Yap</span>}
         </button>
 
         {/* Current user/role */}
-        <div className={`flex items-center gap-2 px-2 py-2 rounded-xl mt-1 ${collapsed ? 'justify-center' : ''}`} style={{ background: '#f5f5f7' }}>
+        <div
+          className={`flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl mt-1 ${collapsed ? 'justify-center' : ''}`}
+          style={{ background: '#f5f5f7' }}
+        >
           <div
             className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
             style={{ background: roleBg, color: roleColor }}
